@@ -1,0 +1,32 @@
+#ifndef __CONF_H__
+#define __CONF_H__
+
+#define MAX_ROUTE_INFO_SIZE 50
+#define MAX_ARP_SIZE 100
+#define MAX_DEVICE_SIZE 10
+
+struct route_item{ 
+	//the information of the static routing table  
+	char destination[16]; 
+	char gateway[16]; 
+	char netmask[16]; 
+	char interface[16]; 
+};  
+
+struct arp_table_item{  
+	//the informaiton of the " my arp cache"
+	char ip_addr[16]; 
+	char mac_addr[18]; 
+};
+
+struct device_item{  
+	//interface and mac
+	char interface[14]; 
+	char mac_addr[18]; 
+};
+
+typedef struct route_item route_item;
+typedef struct arp_table_item arp_table_item;
+typedef struct device_item device_item;
+
+#endif
