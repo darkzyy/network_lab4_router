@@ -1,7 +1,7 @@
 #ifndef __HEADERS_H__
 #define __HEADERS_H__
 
-struct ip_header {
+struct __attribute__((packed)) ip_header {
     unsigned char      iph_ihl:4, iph_ver:4;
     unsigned char      iph_tos;
     unsigned short int iph_len;
@@ -14,7 +14,7 @@ struct ip_header {
     unsigned int       iph_destip;
 };
 
-struct arp_header{
+struct __attribute__((packed)) arp_header{
     unsigned short arp_hd;
     unsigned short arp_pr;
     unsigned char arp_hdl;
@@ -25,6 +25,7 @@ struct arp_header{
     unsigned char arp_dha[6];
     unsigned char arp_dpa[4];
 };
+
 
 typedef struct ip_header ip_header;
 typedef struct arp_header arp_header;

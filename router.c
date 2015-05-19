@@ -1,10 +1,11 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <linux/if_ether.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #include "conf.h"
 #include "headers.h"
@@ -24,19 +25,38 @@ const char* my_mac_addr = "x.x.x...";
 
 int sock_fd;//套接字
 unsigned char socket_buffer[buffer_len];
+arp_header arp_buffer_send;
+unsigned char socket_buffer_arp[buffer_len];
 
 void read_route_tab(const char* filename){
+	FILE* pfile;
+	pfile = fopen("route_table.binary","rb");
+	if(pfile == NULL){
+		printf("error opening a file!\n");
+		return;
+	}
+	int suc;
+	suc = fread(route_tab,1,sizeof(route_tab),pfile);
+	if(suc!=sizeof(route_tab)){
+		printf("error when reading n");
+	}
+	fclose(pfile);
+}
+
+void arp_table_init(){
+	int i;
+	for(i=0;i<MAX_ARP_SIZE;++i){
+		arp_tab[i].valid = 0;
+	}
 }
 
 void arp_reply(unsigned char* eth, arp_header* arph){
 }
 
-inline int route_entry_hit(int i,unsigned int dst_ip){
-	return (route_tab[i].valid == 1 && 
-				((route_tab[i].netmask & dst_ip) == route_tab[i].destination));
-}
+void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface);
 
-void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface){
+inline int route_entry_hit(int i,unsigned int dst_ip){
+	return ((route_tab[i].netmask & dst_ip) == route_tab[i].destination);
 }
 
 void ip_datagram_handle(unsigned char* eth,ip_header* iph){
@@ -46,6 +66,9 @@ void ip_datagram_handle(unsigned char* eth,ip_header* iph){
 	else{
 		int i;
 		for(i=0;i<MAX_ROUTE_INFO_SIZE;++i){
+			if(route_tab[i].valid==0){
+				break;
+			}
 			if(route_entry_hit(i,iph->iph_destip)){//找到转发规则
 				forward_ip_datagram(eth,route_tab[i].gateway,
 							route_tab[i].interface);
@@ -87,6 +110,7 @@ void main_loop(){
 
 
 int main(){
+	read_route_tab("route_tab.binary");
 	if((sock_fd=socket(PF_PACKET,SOCK_RAW,htons(ETH_P_ALL)))<0){
 		printf("error create raw socket\n");
 		return -1;
@@ -94,3 +118,33 @@ int main(){
 	main_loop();
 	return 0;
 }
+
+pthread_mutex_t arp_timeout;
+
+int arp_request(unsigned int dst_ip,int index){//index是在arp table中的下标
+
+}
+
+inline int arp_entry_hit(int i,unsigned int dst_ip){
+	return (arp_tab[i].ip_addr == dst_ip);
+}
+
+void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface){
+	int i;
+	for(i=0;i<MAX_ARP_SIZE;++i){
+		if(arp_tab[i].valid==0){
+			int suc = arp_request(dst_ip,i);
+			if(suc){//forward via arp entry i
+			}
+			else{
+				printf("arp for dstip failed\n");
+				return;
+			}
+		}
+		else{
+			if(arp_entry_hit(i,dst_ip)){//forward via arp entry i
+			}
+		}
+	}
+}
+
