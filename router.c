@@ -139,11 +139,10 @@ int main(){
 	return 0;
 }
 
-pthread_mutex_t arp_timeout;
+//pthread_mutex_t arp_timeout;
 
 int arp_request(unsigned int dst_ip,int index){//index是在arp table中的下标
 	return 0;
-
 }
 
 inline int arp_entry_hit(int i,unsigned int dst_ip){
