@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <assert.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <linux/if_ether.h>
+#include <linux/if_arp.h>
+#include <linux/if_packet.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 
@@ -23,10 +28,14 @@ const unsigned int my_ip_addr_int = 0;
 const char* my_ip_addr = "192.168.x.x";
 const char* my_mac_addr = "x.x.x...";
 
-int sock_fd;//套接字
+int sock_fd = -1;//套接字
 unsigned char socket_buffer[buffer_len];
 arp_header arp_buffer_send;
 unsigned char socket_buffer_arp[buffer_len];
+
+struct sockaddr_ll	skt_addr;
+struct ifreq		ifr;
+//int ifindex		=	0;
 
 void read_route_tab(const char* filename){
 	FILE* pfile;
@@ -48,6 +57,17 @@ void arp_table_init(){
 	for(i=0;i<MAX_ARP_SIZE;++i){
 		arp_tab[i].valid = 0;
 	}
+}
+
+void socket_addr_init(){
+	skt_addr.sll_addr[6] = 0x00;
+	skt_addr.sll_addr[7] = 0x00;
+	skt_addr.sll_family		=	PF_PACKET;
+	skt_addr.sll_protocol	=	htons(ETH_P_IP);
+	//skt_addr.sll_ifindex	=	ifindex;//!!!!!!
+	skt_addr.sll_hatype		=	ARPHRD_ETHER;
+	skt_addr.sll_pkttype	=	0;
+	skt_addr.sll_halen		=	0;
 }
 
 void arp_reply(unsigned char* eth, arp_header* arph){
@@ -122,11 +142,26 @@ int main(){
 pthread_mutex_t arp_timeout;
 
 int arp_request(unsigned int dst_ip,int index){//index是在arp table中的下标
+	return 0;
 
 }
 
 inline int arp_entry_hit(int i,unsigned int dst_ip){
 	return (arp_tab[i].ip_addr == dst_ip);
+}
+
+void change_dstmac_forward_datagram(unsigned char* eth,
+			unsigned char* mac_addr,char* interface){
+	int i;
+	for(i=0;i<6;i++){
+		eth[i]					=	mac_addr[i];
+		skt_addr.sll_addr[i]	=	mac_addr[i];
+	}
+    skt_addr.sll_ifindex = interface[3]-'0';
+	int sent = sendto(sock_fd,socket_buffer,buffer_len,0,
+				(struct sockaddr*)&skt_addr,sizeof(skt_addr));
+	assert(sent>0);
+
 }
 
 void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface){
@@ -135,6 +170,7 @@ void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface)
 		if(arp_tab[i].valid==0){
 			int suc = arp_request(dst_ip,i);
 			if(suc){//forward via arp entry i
+				change_dstmac_forward_datagram(eth,arp_tab[i].mac_addr,interface);
 			}
 			else{
 				printf("arp for dstip failed\n");
@@ -143,6 +179,7 @@ void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface)
 		}
 		else{
 			if(arp_entry_hit(i,dst_ip)){//forward via arp entry i
+				change_dstmac_forward_datagram(eth,arp_tab[i].mac_addr,interface);
 			}
 		}
 	}

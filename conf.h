@@ -25,13 +25,14 @@ struct arp_table_item{
 	//the informaiton of the " my arp cache"
 	int valid;
 	unsigned int ip_addr; 
-	char mac_addr[18]; 
+	unsigned char mac_addr[6]; 
 };
 
 struct device_item{  
 	//interface and mac
+	int valid;
 	char interface[14]; 
-	char mac_addr[18]; 
+	unsigned char mac_addr[6]; 
 };
 
 typedef struct route_item route_item;

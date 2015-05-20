@@ -119,6 +119,7 @@ int main(void) {
             ah = (struct arp_header *)arphead;
             if(htons(ah->arp_op) != ARPOP_REQUEST)
                 continue;
+			/*
             printf("buffer is---------------- %s \n",(char*)ah);
             printf("H/D TYPE : %x PROTO TYPE : %x \n",ah->arp_hd,ah->arp_pr);
             printf("H/D leng : %x PROTO leng : %x \n",ah->arp_hdl,ah->arp_prl);
@@ -137,11 +138,13 @@ int main(void) {
                 ah->arp_spa[2],
                 ah->arp_spa[3]
             );
+			*/
             if(ah->arp_spa[0]==10&&ah->arp_spa[1]==00&&ah->arp_spa[2]==00&&ah->arp_spa[3]==01)
             {
                 printf("Sender ip is .............bam bam..........................................\n");
                 system("sudo arp -s 10.0.0.1  00:1e:73:91:04:0d");
             }
+			/*
             printf("TARGET MAC address: %02X:%02X:%02X:%02X:%02X:%02X\n",
                 ah->arp_dha[0],
                 ah->arp_dha[1],
@@ -174,6 +177,7 @@ int main(void) {
                 eh->h_source[4],
                 eh->h_source[5]
             );
+			*/
             memcpy( (void*)etherhead, (const void*)(etherhead+ETH_MAC_LEN),
                 ETH_MAC_LEN);
             memcpy( (void*)(etherhead+ETH_MAC_LEN), (const void*)src_mac,
