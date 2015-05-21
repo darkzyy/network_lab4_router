@@ -9,10 +9,18 @@ DEVICE	arp_example.c	21;"	d	file:
 ETH_ARP	arp_example.c	24;"	d	file:
 ETH_MAC_LEN	arp_example.c	23;"	d	file:
 ETH_P_NULL	arp_example.c	22;"	d	file:
+MAX_ARP_SIZE	arp_tab/conf.h	5;"	d
 MAX_ARP_SIZE	conf.h	5;"	d
+MAX_ARP_SIZE	route_tab/conf.h	5;"	d
+MAX_DEVICE_SIZE	arp_tab/conf.h	6;"	d
 MAX_DEVICE_SIZE	conf.h	6;"	d
+MAX_DEVICE_SIZE	route_tab/conf.h	6;"	d
+MAX_ROUTE_INFO_SIZE	arp_tab/conf.h	4;"	d
 MAX_ROUTE_INFO_SIZE	conf.h	4;"	d
+MAX_ROUTE_INFO_SIZE	route_tab/conf.h	4;"	d
+__CONF_H__	arp_tab/conf.h	2;"	d
 __CONF_H__	conf.h	2;"	d
+__CONF_H__	route_tab/conf.h	2;"	d
 __HEADERS_H__	headers.h	2;"	d
 answered_packets	arp_example.c	/^long answered_packets = 0;$/;"	v
 arp_buffer_send	router.c	/^arp_header arp_buffer_send;$/;"	v
@@ -58,29 +66,62 @@ arp_sha	arp_example.c	/^    unsigned char arp_sha[6];$/;"	m	struct:arp_header	fi
 arp_sha	headers.h	/^    unsigned char arp_sha[6];$/;"	m	struct:arp_header	access:public
 arp_spa	arp_example.c	/^    unsigned char arp_spa[4];$/;"	m	struct:arp_header	file:	access:public
 arp_spa	headers.h	/^    unsigned char arp_spa[4];$/;"	m	struct:arp_header	access:public
+arp_tab	arp_tab/gen_arp_tab.c	/^arp_table_item arp_tab[MAX_ARP_SIZE];$/;"	v
 arp_tab	router.c	/^arp_table_item	arp_tab[MAX_ARP_SIZE];$/;"	v
 arp_table_init	router.c	/^void arp_table_init(){$/;"	f
+arp_table_item	arp_tab/conf.h	/^struct arp_table_item{  $/;"	s
+arp_table_item	arp_tab/conf.h	/^typedef struct arp_table_item arp_table_item;$/;"	t	typeref:struct:arp_table_item
 arp_table_item	conf.h	/^struct arp_table_item{  $/;"	s
 arp_table_item	conf.h	/^typedef struct arp_table_item arp_table_item;$/;"	t	typeref:struct:arp_table_item
+arp_table_item	route_tab/conf.h	/^struct arp_table_item{  $/;"	s
+arp_table_item	route_tab/conf.h	/^typedef struct arp_table_item arp_table_item;$/;"	t	typeref:struct:arp_table_item
+arp_table_item::ip_addr	arp_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
 arp_table_item::ip_addr	conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
-arp_table_item::mac_addr	conf.h	/^	char mac_addr[18]; $/;"	m	struct:arp_table_item	access:public
+arp_table_item::ip_addr	route_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
+arp_table_item::mac_addr	arp_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:arp_table_item	access:public
+arp_table_item::mac_addr	conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:arp_table_item	access:public
+arp_table_item::mac_addr	route_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:arp_table_item	access:public
+arp_table_item::valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:arp_table_item	access:public
 arp_table_item::valid	conf.h	/^	int valid;$/;"	m	struct:arp_table_item	access:public
-arp_timeout	router.c	/^pthread_mutex_t arp_timeout;$/;"	v
+arp_table_item::valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:arp_table_item	access:public
 buffer	arp_example.c	/^void* buffer = NULL;$/;"	v
-buffer_len	router.c	13;"	d	file:
+buffer_len	router.c	18;"	d	file:
+change_dstmac_forward_datagram	router.c	/^void change_dstmac_forward_datagram(unsigned char* eth,$/;"	f	signature:(unsigned char* eth, unsigned char* mac_addr,char* interface)
 chksum	headers.h	/^unsigned short chksum(unsigned short*buff,int len){$/;"	f	signature:(unsigned short*buff,int len)
+destination	arp_tab/conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
 destination	conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
+destination	route_tab/conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
+device_item	arp_tab/conf.h	/^struct device_item{  $/;"	s
+device_item	arp_tab/conf.h	/^typedef struct device_item device_item;$/;"	t	typeref:struct:device_item
 device_item	conf.h	/^struct device_item{  $/;"	s
 device_item	conf.h	/^typedef struct device_item device_item;$/;"	t	typeref:struct:device_item
+device_item	route_tab/conf.h	/^struct device_item{  $/;"	s
+device_item	route_tab/conf.h	/^typedef struct device_item device_item;$/;"	t	typeref:struct:device_item
+device_item::interface	arp_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
 device_item::interface	conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
-device_item::mac_addr	conf.h	/^	char mac_addr[18]; $/;"	m	struct:device_item	access:public
+device_item::interface	route_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
+device_item::mac_addr	arp_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
+device_item::mac_addr	conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
+device_item::mac_addr	route_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
+device_item::valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
+device_item::valid	conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
+device_item::valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
 device_tab	router.c	/^device_item		device_tab[MAX_DEVICE_SIZE];$/;"	v
 forward_ip_datagram	router.c	/^void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface);$/;"	p	file:	signature:(unsigned char* eth,unsigned int dst_ip,char* interface)
 forward_ip_datagram	router.c	/^void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface){$/;"	f	signature:(unsigned char* eth,unsigned int dst_ip,char* interface)
+gateway	arp_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
 gateway	conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
+gateway	route_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
+ifr	router.c	/^struct ifreq		ifr;$/;"	v	typeref:struct:ifreq
+interface	arp_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
+interface	arp_tab/conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
 interface	conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
 interface	conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
+interface	route_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
+interface	route_tab/conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
+ip_addr	arp_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
 ip_addr	conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
+ip_addr	route_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
 ip_datagram_handle	router.c	/^void ip_datagram_handle(unsigned char* eth,ip_header* iph){$/;"	f	signature:(unsigned char* eth,ip_header* iph)
 ip_header	headers.h	/^struct __attribute__((packed)) ip_header {$/;"	s
 ip_header	headers.h	/^typedef struct ip_header ip_header;$/;"	t	typeref:struct:ip_header
@@ -106,35 +147,67 @@ iph_sourceip	headers.h	/^    unsigned int       iph_sourceip;$/;"	m	struct:ip_he
 iph_tos	headers.h	/^    unsigned char      iph_tos;$/;"	m	struct:ip_header	access:public
 iph_ttl	headers.h	/^    unsigned char      iph_ttl;$/;"	m	struct:ip_header	access:public
 iph_ver	headers.h	/^    unsigned char      iph_ihl:4, iph_ver:4;$/;"	m	struct:ip_header	access:public
-mac_addr	conf.h	/^	char mac_addr[18]; $/;"	m	struct:arp_table_item	access:public
-mac_addr	conf.h	/^	char mac_addr[18]; $/;"	m	struct:device_item	access:public
+mac_addr	arp_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:arp_table_item	access:public
+mac_addr	arp_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
+mac_addr	conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:arp_table_item	access:public
+mac_addr	conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
+mac_addr	route_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:arp_table_item	access:public
+mac_addr	route_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
 main	arp_example.c	/^int main(void) {$/;"	f	signature:(void)
-main	gen_route_tab.c	/^int main(){$/;"	f
+main	arp_tab/gen_arp_tab.c	/^int main(){$/;"	f
+main	route_tab/gen_route_tab.c	/^int main(){$/;"	f
 main	router.c	/^int main(){$/;"	f
+main	test/c_shell.c	/^int main(){$/;"	f
 main_loop	router.c	/^void main_loop(){$/;"	f
 my_ip_addr	router.c	/^const char* my_ip_addr = "192.168.x.x";$/;"	v
 my_ip_addr_int	router.c	/^const unsigned int my_ip_addr_int = 0;$/;"	v
 my_mac_addr	router.c	/^const char* my_mac_addr = "x.x.x...";$/;"	v
+netmask	arp_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
 netmask	conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
-proto_arp	router.c	14;"	d	file:
-proto_ip	router.c	15;"	d	file:
+netmask	route_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
+proto_arp	router.c	19;"	d	file:
+proto_ip	router.c	20;"	d	file:
 read_route_tab	router.c	/^void read_route_tab(const char* filename){$/;"	f	signature:(const char* filename)
+read_static_arp_tab	router.c	/^void read_static_arp_tab(const char* filename){$/;"	f	signature:(const char* filename)
 route_entry_hit	router.c	/^inline int route_entry_hit(int i,unsigned int dst_ip){$/;"	f	signature:(int i,unsigned int dst_ip)
+route_item	arp_tab/conf.h	/^struct route_item{ $/;"	s
+route_item	arp_tab/conf.h	/^typedef struct route_item route_item;$/;"	t	typeref:struct:route_item
 route_item	conf.h	/^struct route_item{ $/;"	s
 route_item	conf.h	/^typedef struct route_item route_item;$/;"	t	typeref:struct:route_item
+route_item	route_tab/conf.h	/^struct route_item{ $/;"	s
+route_item	route_tab/conf.h	/^typedef struct route_item route_item;$/;"	t	typeref:struct:route_item
+route_item::destination	arp_tab/conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
 route_item::destination	conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
+route_item::destination	route_tab/conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
+route_item::gateway	arp_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
 route_item::gateway	conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
+route_item::gateway	route_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
+route_item::interface	arp_tab/conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
 route_item::interface	conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
+route_item::interface	route_tab/conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
+route_item::netmask	arp_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
 route_item::netmask	conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
+route_item::netmask	route_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
+route_item::valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:route_item	access:public
 route_item::valid	conf.h	/^	int valid;$/;"	m	struct:route_item	access:public
-route_tab	gen_route_tab.c	/^route_item      route_tab[MAX_ROUTE_INFO_SIZE];$/;"	v
+route_item::valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:route_item	access:public
+route_tab	route_tab/gen_route_tab.c	/^route_item      route_tab[MAX_ROUTE_INFO_SIZE];$/;"	v
 route_tab	router.c	/^route_item		route_tab[MAX_ROUTE_INFO_SIZE];$/;"	v
 s	arp_example.c	/^int s = -1; \/*Socketdescriptor*\/$/;"	v
 sigint	arp_example.c	/^void sigint(int signum) {$/;"	f	signature:(int signum)
 sigint	arp_example.c	/^void sigint(int signum);$/;"	p	file:	signature:(int signum)
-sock_fd	router.c	/^int sock_fd;\/\/套接字$/;"	v
+skt_addr	router.c	/^struct sockaddr_ll	skt_addr;$/;"	v	typeref:struct:sockaddr_ll
+sock_fd	router.c	/^int sock_fd = -1;\/\/套接字$/;"	v
+socket_addr_init	router.c	/^void socket_addr_init(){$/;"	f
 socket_buffer	router.c	/^unsigned char socket_buffer[buffer_len];$/;"	v
 socket_buffer_arp	router.c	/^unsigned char socket_buffer_arp[buffer_len];$/;"	v
 total_packets	arp_example.c	/^long total_packets = 0;$/;"	v
+valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:arp_table_item	access:public
+valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
+valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:route_item	access:public
 valid	conf.h	/^	int valid;$/;"	m	struct:arp_table_item	access:public
+valid	conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
 valid	conf.h	/^	int valid;$/;"	m	struct:route_item	access:public
+valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:arp_table_item	access:public
+valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
+valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:route_item	access:public

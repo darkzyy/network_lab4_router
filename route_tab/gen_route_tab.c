@@ -15,13 +15,13 @@ int main(){
 	route_tab[0].gateway		=	inet_addr("192.168.1.1");
 	route_tab[0].netmask		=	inet_addr("255.255.255.0");
 	route_tab[0].valid			=	1;
-	strcpy(route_tab[0].interface,"eth0");
+	strcpy(route_tab[0].interface,"eth1");
 
 	route_tab[1].destination	=	inet_addr("192.168.2.0");
 	route_tab[1].gateway		=	inet_addr("192.168.2.1");
 	route_tab[1].netmask		=	inet_addr("255.255.255.0");
 	route_tab[1].valid			=	1;
-	strcpy(route_tab[0].interface,"eth0");
+	strcpy(route_tab[1].interface,"eth2");
 
 	FILE* pfile;
 	pfile = fopen("route_table.binary","wb");

@@ -11,6 +11,22 @@ int main(){
 	for(i=0;i<MAX_ARP_SIZE;i++){
 		arp_tab[i].valid = 0;
 	}
+	arp_tab[0].valid		=	1;//PC0_
+	arp_tab[0].ip_addr		=	inet_addr("192.168.1.2");
+	arp_tab[0].mac_addr[0]	=	0x00;
+	arp_tab[0].mac_addr[1]	=	0x0c;
+	arp_tab[0].mac_addr[2]	=	0x29;
+	arp_tab[0].mac_addr[3]	=	0x87;
+	arp_tab[0].mac_addr[4]	=	0xa4;
+	arp_tab[0].mac_addr[5]	=	0xce;
+	arp_tab[1].valid		=	1;//PC0_
+	arp_tab[1].ip_addr		=	inet_addr("192.168.2.2");
+	arp_tab[1].mac_addr[0]	=	0x00;
+	arp_tab[1].mac_addr[1]	=	0x0c;
+	arp_tab[1].mac_addr[2]	=	0x29;
+	arp_tab[1].mac_addr[3]	=	0x30;
+	arp_tab[1].mac_addr[4]	=	0xb4;
+	arp_tab[1].mac_addr[5]	=	0x8c;
 
 	FILE* pfile;
 	pfile = fopen("arp_table.binary","wb");
@@ -22,6 +38,7 @@ int main(){
 	fwrite(arp_tab,sizeof(char),sizeof(arp_tab),pfile);
 	fclose(pfile);
 
+	/*****************test bellow*****************/
 	pfile = fopen("arp_table.binary","rb");
 	if(pfile == NULL){
 		printf("error opening a file!\n");
