@@ -29,8 +29,9 @@ arp_buffer_send	router.c	/^arp_header arp_buffer_send;$/;"	v
 arp_dha	arp_example.c	/^    unsigned char arp_dha[6];$/;"	m	struct:arp_header	file:	access:public
 arp_dha	headers.h	/^    unsigned char arp_dha[6];$/;"	m	struct:arp_header	access:public
 arp_dpa	arp_example.c	/^    unsigned char arp_dpa[4];$/;"	m	struct:arp_header	file:	access:public
-arp_dpa	headers.h	/^    unsigned char arp_dpa[4];$/;"	m	struct:arp_header	access:public
+arp_dpa	headers.h	/^    unsigned int arp_dpa;$/;"	m	struct:arp_header	access:public
 arp_entry_hit	router.c	/^inline int arp_entry_hit(int i,unsigned int dst_ip){$/;"	f	signature:(int i,unsigned int dst_ip)
+arp_handle	router.c	/^void arp_handle(unsigned char* eth, arp_header* arph){$/;"	f	signature:(unsigned char* eth, arp_header* arph)
 arp_hd	arp_example.c	/^    unsigned short arp_hd;$/;"	m	struct:arp_header	file:	access:public
 arp_hdl	arp_example.c	/^    unsigned char arp_hdl;$/;"	m	struct:arp_header	file:	access:public
 arp_header	arp_example.c	/^struct __attribute__((packed)) arp_header$/;"	s	file:
@@ -39,36 +40,35 @@ arp_header	headers.h	/^typedef struct arp_header arp_header;$/;"	t	typeref:struc
 arp_header::arp_dha	arp_example.c	/^    unsigned char arp_dha[6];$/;"	m	struct:arp_header	file:	access:public
 arp_header::arp_dha	headers.h	/^    unsigned char arp_dha[6];$/;"	m	struct:arp_header	access:public
 arp_header::arp_dpa	arp_example.c	/^    unsigned char arp_dpa[4];$/;"	m	struct:arp_header	file:	access:public
-arp_header::arp_dpa	headers.h	/^    unsigned char arp_dpa[4];$/;"	m	struct:arp_header	access:public
+arp_header::arp_dpa	headers.h	/^    unsigned int arp_dpa;$/;"	m	struct:arp_header	access:public
 arp_header::arp_hd	arp_example.c	/^    unsigned short arp_hd;$/;"	m	struct:arp_header	file:	access:public
 arp_header::arp_hdl	arp_example.c	/^    unsigned char arp_hdl;$/;"	m	struct:arp_header	file:	access:public
-arp_header::arp_hwsize	headers.h	/^    unsigned char arp_hwsize;$/;"	m	struct:arp_header	access:public
+arp_header::arp_hwsz	headers.h	/^    unsigned char arp_hwsz;$/;"	m	struct:arp_header	access:public
 arp_header::arp_hwtype	headers.h	/^    unsigned short arp_hwtype;$/;"	m	struct:arp_header	access:public
 arp_header::arp_op	arp_example.c	/^    unsigned short arp_op;$/;"	m	struct:arp_header	file:	access:public
 arp_header::arp_opcode	headers.h	/^    unsigned short arp_opcode;$/;"	m	struct:arp_header	access:public
 arp_header::arp_pr	arp_example.c	/^    unsigned short arp_pr;$/;"	m	struct:arp_header	file:	access:public
 arp_header::arp_prl	arp_example.c	/^    unsigned char arp_prl;$/;"	m	struct:arp_header	file:	access:public
 arp_header::arp_proto	headers.h	/^    unsigned short arp_proto;$/;"	m	struct:arp_header	access:public
-arp_header::arp_protosize	headers.h	/^    unsigned char arp_protosize;$/;"	m	struct:arp_header	access:public
+arp_header::arp_protosz	headers.h	/^    unsigned char arp_protosz;$/;"	m	struct:arp_header	access:public
 arp_header::arp_sha	arp_example.c	/^    unsigned char arp_sha[6];$/;"	m	struct:arp_header	file:	access:public
 arp_header::arp_sha	headers.h	/^    unsigned char arp_sha[6];$/;"	m	struct:arp_header	access:public
 arp_header::arp_spa	arp_example.c	/^    unsigned char arp_spa[4];$/;"	m	struct:arp_header	file:	access:public
-arp_header::arp_spa	headers.h	/^    unsigned char arp_spa[4];$/;"	m	struct:arp_header	access:public
-arp_hwsize	headers.h	/^    unsigned char arp_hwsize;$/;"	m	struct:arp_header	access:public
+arp_header::arp_spa	headers.h	/^    unsigned int arp_spa;$/;"	m	struct:arp_header	access:public
+arp_hwsz	headers.h	/^    unsigned char arp_hwsz;$/;"	m	struct:arp_header	access:public
 arp_hwtype	headers.h	/^    unsigned short arp_hwtype;$/;"	m	struct:arp_header	access:public
-arp_len	router.c	19;"	d	file:
+arp_len	router.c	20;"	d	file:
 arp_op	arp_example.c	/^    unsigned short arp_op;$/;"	m	struct:arp_header	file:	access:public
 arp_opcode	headers.h	/^    unsigned short arp_opcode;$/;"	m	struct:arp_header	access:public
 arp_pr	arp_example.c	/^    unsigned short arp_pr;$/;"	m	struct:arp_header	file:	access:public
 arp_prl	arp_example.c	/^    unsigned char arp_prl;$/;"	m	struct:arp_header	file:	access:public
 arp_proto	headers.h	/^    unsigned short arp_proto;$/;"	m	struct:arp_header	access:public
-arp_protosize	headers.h	/^    unsigned char arp_protosize;$/;"	m	struct:arp_header	access:public
-arp_reply	router.c	/^void arp_reply(unsigned char* eth, arp_header* arph){$/;"	f	signature:(unsigned char* eth, arp_header* arph)
-arp_request	router.c	/^int arp_request(unsigned int dst_ip,char* interface){\/\/index是在arp table中的下标$/;"	f	signature:(unsigned int dst_ip,char* interface)
+arp_protosz	headers.h	/^    unsigned char arp_protosz;$/;"	m	struct:arp_header	access:public
+arp_request	router.c	/^int arp_request(unsigned int dst_ip,int route_tab_index){\/\/index是在arp table中的下标$/;"	f	signature:(unsigned int dst_ip,int route_tab_index)
 arp_sha	arp_example.c	/^    unsigned char arp_sha[6];$/;"	m	struct:arp_header	file:	access:public
 arp_sha	headers.h	/^    unsigned char arp_sha[6];$/;"	m	struct:arp_header	access:public
 arp_spa	arp_example.c	/^    unsigned char arp_spa[4];$/;"	m	struct:arp_header	file:	access:public
-arp_spa	headers.h	/^    unsigned char arp_spa[4];$/;"	m	struct:arp_header	access:public
+arp_spa	headers.h	/^    unsigned int arp_spa;$/;"	m	struct:arp_header	access:public
 arp_tab	arp_tab/gen_arp_tab.c	/^arp_table_item arp_tab[MAX_ARP_SIZE];$/;"	v
 arp_tab	router.c	/^arp_table_item	arp_tab[MAX_ARP_SIZE];$/;"	v
 arp_table_init	router.c	/^void arp_table_init(){$/;"	f
@@ -90,7 +90,9 @@ arp_table_item::valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:arp_table_item
 buffer	arp_example.c	/^void* buffer = NULL;$/;"	v
 buffer_len	router.c	18;"	d	file:
 change_dstmac_forward_datagram	router.c	/^void change_dstmac_forward_datagram(unsigned char* eth,$/;"	f	signature:(unsigned char* eth, unsigned char* mac_addr,char* interface)
+change_dstmac_forward_datagram	router.c	/^void change_dstmac_forward_datagram(unsigned char* eth,$/;"	p	file:	signature:(unsigned char* eth, unsigned char* mac_addr,char* interface)
 chksum	headers.h	/^unsigned short chksum(unsigned short*buff,int len){$/;"	f	signature:(unsigned short*buff,int len)
+current_queue_len	router.c	/^int current_queue_len = 0;$/;"	v
 destination	arp_tab/conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
 destination	conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
 destination	route_tab/conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
@@ -103,6 +105,7 @@ device_item	route_tab/conf.h	/^typedef struct device_item device_item;$/;"	t	typ
 device_item::interface	arp_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
 device_item::interface	conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
 device_item::interface	route_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
+device_item::ip_addr	conf.h	/^	unsigned int ip_addr;$/;"	m	struct:device_item	access:public
 device_item::mac_addr	arp_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
 device_item::mac_addr	conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
 device_item::mac_addr	route_tab/conf.h	/^	unsigned char mac_addr[6]; $/;"	m	struct:device_item	access:public
@@ -110,12 +113,13 @@ device_item::valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:device_item	access:
 device_item::valid	conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
 device_item::valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
 device_tab	router.c	/^device_item		device_tab[MAX_DEVICE_SIZE];$/;"	v
-forward_ip_datagram	router.c	/^void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface);$/;"	p	file:	signature:(unsigned char* eth,unsigned int dst_ip,char* interface)
-forward_ip_datagram	router.c	/^void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface){$/;"	f	signature:(unsigned char* eth,unsigned int dst_ip,char* interface)
+forward_ip_datagram	router.c	/^void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_index);$/;"	p	file:	signature:(unsigned char* eth,unsigned int dst_ip,int route_tab_index)
+forward_ip_datagram	router.c	/^void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_index){$/;"	f	signature:(unsigned char* eth,unsigned int dst_ip,int route_tab_index)
 gateway	arp_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
 gateway	conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
 gateway	route_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
 ifr	router.c	/^struct ifreq		ifr;$/;"	v	typeref:struct:ifreq
+init_device_tab	router.c	/^void init_device_tab(){$/;"	f
 interface	arp_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
 interface	arp_tab/conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
 interface	conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
@@ -124,6 +128,7 @@ interface	route_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	acce
 interface	route_tab/conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
 ip_addr	arp_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
 ip_addr	conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
+ip_addr	conf.h	/^	unsigned int ip_addr;$/;"	m	struct:device_item	access:public
 ip_addr	route_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
 ip_datagram_handle	router.c	/^void ip_datagram_handle(unsigned char* eth,ip_header* iph){$/;"	f	signature:(unsigned char* eth,ip_header* iph)
 ip_header	headers.h	/^struct __attribute__((packed)) ip_header {$/;"	s
@@ -168,8 +173,10 @@ my_mac_addr	router.c	/^const char* my_mac_addr = "x.x.x...";$/;"	v
 netmask	arp_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
 netmask	conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
 netmask	route_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
-proto_arp	router.c	20;"	d	file:
-proto_ip	router.c	21;"	d	file:
+proto_arp	router.c	21;"	d	file:
+proto_ip	router.c	22;"	d	file:
+queue_len	router.c	19;"	d	file:
+queue_valid	router.c	/^int queue_valid[queue_len];$/;"	v
 read_route_tab	router.c	/^void read_route_tab(const char* filename){$/;"	f	signature:(const char* filename)
 read_static_arp_tab	router.c	/^void read_static_arp_tab(const char* filename){$/;"	f	signature:(const char* filename)
 route_entry_hit	router.c	/^inline int route_entry_hit(int i,unsigned int dst_ip){$/;"	f	signature:(int i,unsigned int dst_ip)
@@ -203,6 +210,7 @@ skt_addr	router.c	/^struct sockaddr_ll	skt_addr;$/;"	v	typeref:struct:sockaddr_l
 sock_fd	router.c	/^int sock_fd = -1;\/\/套接字$/;"	v
 socket_addr_init	router.c	/^void socket_addr_init(){$/;"	f
 socket_buffer	router.c	/^unsigned char socket_buffer[buffer_len];$/;"	v
+socket_queue	router.c	/^unsigned char socket_queue[queue_len][buffer_len];$/;"	v
 total_packets	arp_example.c	/^long total_packets = 0;$/;"	v
 valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:arp_table_item	access:public
 valid	arp_tab/conf.h	/^	int valid;$/;"	m	struct:device_item	access:public
