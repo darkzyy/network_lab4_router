@@ -16,6 +16,7 @@
 #include "headers.h"
 
 #define buffer_len 1024
+#define arp_len 42
 #define proto_arp 0x0806
 #define proto_ip 0x0800
 
@@ -31,11 +32,38 @@ const char* my_mac_addr = "x.x.x...";
 int sock_fd = -1;//套接字
 unsigned char socket_buffer[buffer_len];
 arp_header arp_buffer_send;
-unsigned char socket_buffer_arp[buffer_len];
+unsigned char arp_buffer[arp_len];
 
 struct sockaddr_ll	skt_addr;
 struct ifreq		ifr;
 //int ifindex		=	0;
+
+void init_device_tab(){
+	device_tab[0].valid			= 1;
+	strcpy(device_tab[0].interface,"eth1");
+	device_tab[0].mac_addr[0]	= 0x00; 
+	device_tab[0].mac_addr[1]	= 0x0c; 
+	device_tab[0].mac_addr[2]	= 0x29; 
+	device_tab[0].mac_addr[3]	= 0x8d; 
+	device_tab[0].mac_addr[4]	= 0x82; 
+	device_tab[0].mac_addr[5]	= 0x8b; 
+	device_tab[0].ip_addr		= inet_addr("192.168.1.1");
+
+	device_tab[1].valid			= 1;
+	strcpy(device_tab[1].interface,"eth2");
+	device_tab[1].mac_addr[0]	= 0x00; 
+	device_tab[1].mac_addr[1]	= 0x0c; 
+	device_tab[1].mac_addr[2]	= 0x29; 
+	device_tab[1].mac_addr[3]	= 0x8d; 
+	device_tab[1].mac_addr[4]	= 0x82; 
+	device_tab[1].mac_addr[5]	= 0x95; 
+	device_tab[1].ip_addr		= inet_addr("192.168.2.1");
+
+	int i;
+	for(i=2;i<MAX_DEVICE_SIZE;++i){
+		device_tab[i].valid = 0;
+	}
+}
 
 void read_route_tab(const char* filename){
 	FILE* pfile;
@@ -70,6 +98,15 @@ void arp_table_init(){
 	}
 }
 
+void arp_buffer_init(){
+	arp_header* arph	=	(arp_header*)(arp_buffer+14);
+	arph->arp_hwtype	=	1;//Ethernet
+	arph->arp_proto	=	0x0800;
+	arph->arp_hwsz		=	6;
+	arph->arp_protosz	=	4;
+	arph->arp_opcode	=	1;
+}
+
 void read_static_arp_tab(const char* filename){
 	FILE* pfile;
 	pfile = fopen(filename,"rb");
@@ -99,7 +136,6 @@ void socket_addr_init(){
 	skt_addr.sll_addr[6] = 0x00;
 	skt_addr.sll_addr[7] = 0x00;
 	skt_addr.sll_family		=	PF_PACKET;
-	skt_addr.sll_protocol	=	htons(ETH_P_IP);
 	skt_addr.sll_ifindex	=	0;//!!!!!!
 	skt_addr.sll_hatype		=	0;
 	skt_addr.sll_pkttype	=	0;
@@ -109,7 +145,7 @@ void socket_addr_init(){
 void arp_reply(unsigned char* eth, arp_header* arph){
 }
 
-void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface);
+void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_index);
 
 inline int route_entry_hit(int i,unsigned int dst_ip){
 	return ((route_tab[i].netmask & dst_ip) == route_tab[i].destination);
@@ -128,8 +164,7 @@ void ip_datagram_handle(unsigned char* eth,ip_header* iph){
 			}
 			if(route_entry_hit(i,iph->iph_destip)){//找到转发规则
 				printf("hit a route entry\n");
-				forward_ip_datagram(eth,iph->iph_destip,
-							route_tab[i].interface);
+				forward_ip_datagram(eth,iph->iph_destip,i);
 				return ;
 			}
 		}
@@ -174,6 +209,7 @@ void main_loop(){
 
 int main(){
 	socket_addr_init();
+	init_device_tab();
 	read_route_tab("./route_tab/route_table.binary");
 	read_static_arp_tab("./arp_tab/arp_table.binary");
 	if((sock_fd=socket(PF_PACKET,SOCK_RAW,htons(ETH_P_ALL)))<0){
@@ -184,9 +220,29 @@ int main(){
 	return 0;
 }
 
-//pthread_mutex_t arp_timeout;
+int arp_request(unsigned int dst_ip,int route_tab_index){//index是在arp table中的下标
+	arp_header* arph = (arp_header*)(arp_buffer+14);
+	int i;
+	for(i=0;i<6;++i){
+		arph->arp_sha[i] = device_tab[route_tab_index].mac_addr[i];
+		arph->arp_dha[i] = 0xff;
+	}
+	arph->arp_spa = device_tab[route_tab_index].ip_addr;
+	arph->arp_dpa = dst_ip;
 
-int arp_request(unsigned int dst_ip,int index){//index是在arp table中的下标
+	//get ifindex
+	strncpy(ifr.ifr_name, route_tab[route_tab_index].interface, IFNAMSIZ);
+    if (ioctl(sock_fd, SIOCGIFINDEX, &ifr) == -1) {
+        perror("SIOCGIFINDEX");
+        //exit(1);
+		return 0;
+    }
+    skt_addr.sll_ifindex = ifr.ifr_ifindex;
+	skt_addr.sll_protocol	=	htons(ETH_P_ARP);
+	int sent = sendto(sock_fd,arp_buffer,arp_len,0,
+				(struct sockaddr*)&skt_addr,sizeof(skt_addr));
+	assert(sent>0);
+	printf("-------------------send an arp\n");
 	return 0;
 }
 
@@ -198,15 +254,15 @@ inline int arp_entry_hit(int i,unsigned int dst_ip){
 void change_dstmac_forward_datagram(unsigned char* eth,
 			unsigned char* mac_addr,char* interface){
 	int i;
-	printf("my_mac:\n");
+	//printf("my_mac:\n");
 	for(i=0;i<6;i++){
 		printf("0x%x ",eth[i]);
 	}
-	printf("\ndst_mac:\n");
+	//printf("\ndst_mac:\n");
 	for(i=0;i<6;i++){
 		printf("0x%x ",mac_addr[i]);
 	}
-	printf("\n");
+	//printf("\n");
 	for(i=0;i<6;i++){
 		eth[i+6]				=	eth[i];
 		eth[i]					=	mac_addr[i];
@@ -216,27 +272,29 @@ void change_dstmac_forward_datagram(unsigned char* eth,
 	strncpy(ifr.ifr_name, interface, IFNAMSIZ);
     if (ioctl(sock_fd, SIOCGIFINDEX, &ifr) == -1) {
         perror("SIOCGIFINDEX");
-        exit(1);
+        //exit(1);
+		return;
     }
-
     skt_addr.sll_ifindex = ifr.ifr_ifindex;
-
-	//printf("interface: %s\n",interface);
-	//setsockopt(sock_fd,SOL_SOCKET,SO_BINDTODEVICE,interface,4);
+	skt_addr.sll_protocol	=	htons(ETH_P_IP);
 	printf("ifindex: %d\n",skt_addr.sll_ifindex);
-	int sent = sendto(sock_fd,socket_buffer,buffer_len,0,
+
+	ip_header* iph = (ip_header*)(eth+14);
+	int packet_len = htons(iph->iph_len) + 14;
+	int sent = sendto(sock_fd,socket_buffer,packet_len,0,
 				(struct sockaddr*)&skt_addr,sizeof(skt_addr));
 	assert(sent>0);
 	printf("-------------------forwarded a datagram\n");
 
 }
 
-void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,char* interface){
+void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_index){
 	int i;
+	char* interface = route_tab[route_tab_index].interface;
 	for(i=0;i<MAX_ARP_SIZE;++i){
 		printf("i = %d\n",i);
 		if(arp_tab[i].valid==0){
-			int suc = arp_request(dst_ip,i);
+			int suc = arp_request(dst_ip,route_tab_index);
 			if(suc){//forward via arp entry i
 				change_dstmac_forward_datagram(eth,arp_tab[i].mac_addr,interface);
 				break;

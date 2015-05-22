@@ -2,9 +2,7 @@
 #include<unistd.h>
 
 int main(){
-	while(1){
-		system("arping -I eth0 192.168.80.1");
+		system("arping -c 1 -I eth0 192.168.80.1 > /tmp/route_tmp");
 		sleep(1);
-	}
 	return 0;
 }

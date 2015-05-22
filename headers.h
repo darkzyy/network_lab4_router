@@ -15,15 +15,15 @@ struct __attribute__((packed)) ip_header {
 };
 
 struct __attribute__((packed)) arp_header{
-    unsigned short arp_hd;
-    unsigned short arp_pr;
-    unsigned char arp_hdl;
-    unsigned char arp_prl;
-    unsigned short arp_op;
+    unsigned short arp_hwtype;
+    unsigned short arp_proto;
+    unsigned char arp_hwsz;
+    unsigned char arp_protosz;
+    unsigned short arp_opcode;
     unsigned char arp_sha[6];
-    unsigned char arp_spa[4];
+    unsigned int arp_spa;
     unsigned char arp_dha[6];
-    unsigned char arp_dpa[4];
+    unsigned int arp_dpa;
 };
 
 
