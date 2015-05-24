@@ -90,7 +90,6 @@ arp_table_item::valid	route_tab/conf.h	/^	int valid;$/;"	m	struct:arp_table_item
 buffer	arp_example.c	/^void* buffer = NULL;$/;"	v
 buffer_len	router.c	18;"	d	file:
 change_dstmac_forward_datagram	router.c	/^void change_dstmac_forward_datagram(unsigned char* eth,$/;"	f	signature:(unsigned char* eth, unsigned char* mac_addr,char* interface)
-change_dstmac_forward_datagram	router.c	/^void change_dstmac_forward_datagram(unsigned char* eth,$/;"	p	file:	signature:(unsigned char* eth, unsigned char* mac_addr,char* interface)
 chksum	headers.h	/^unsigned short chksum(unsigned short*buff,int len){$/;"	f	signature:(unsigned short*buff,int len)
 current_queue_len	router.c	/^int current_queue_len = 0;$/;"	v
 destination	arp_tab/conf.h	/^	unsigned int destination; $/;"	m	struct:route_item	access:public
@@ -119,6 +118,7 @@ gateway	arp_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:
 gateway	conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
 gateway	route_tab/conf.h	/^	unsigned int gateway; $/;"	m	struct:route_item	access:public
 ifr	router.c	/^struct ifreq		ifr;$/;"	v	typeref:struct:ifreq
+in_subnet	router.c	/^inline int in_subnet(unsigned int ip){$/;"	f	signature:(unsigned int ip)
 init_device_tab	router.c	/^void init_device_tab(){$/;"	f
 interface	arp_tab/conf.h	/^	char interface[14]; $/;"	m	struct:device_item	access:public
 interface	arp_tab/conf.h	/^	char interface[16]; $/;"	m	struct:route_item	access:public
@@ -130,6 +130,7 @@ ip_addr	arp_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	acc
 ip_addr	conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
 ip_addr	conf.h	/^	unsigned int ip_addr;$/;"	m	struct:device_item	access:public
 ip_addr	route_tab/conf.h	/^	unsigned int ip_addr; $/;"	m	struct:arp_table_item	access:public
+ip_datagram_handle	router.c	/^void ip_datagram_handle(unsigned char* eth,ip_header* iph);$/;"	p	file:	signature:(unsigned char* eth,ip_header* iph)
 ip_datagram_handle	router.c	/^void ip_datagram_handle(unsigned char* eth,ip_header* iph){$/;"	f	signature:(unsigned char* eth,ip_header* iph)
 ip_header	headers.h	/^struct __attribute__((packed)) ip_header {$/;"	s
 ip_header	headers.h	/^typedef struct ip_header ip_header;$/;"	t	typeref:struct:ip_header
@@ -173,6 +174,7 @@ my_mac_addr	router.c	/^const char* my_mac_addr = "x.x.x...";$/;"	v
 netmask	arp_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
 netmask	conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
 netmask	route_tab/conf.h	/^	unsigned int netmask; $/;"	m	struct:route_item	access:public
+print_ip	router.c	/^void print_ip(unsigned int* ip){$/;"	f	signature:(unsigned int* ip)
 proto_arp	router.c	21;"	d	file:
 proto_ip	router.c	22;"	d	file:
 queue_len	router.c	19;"	d	file:

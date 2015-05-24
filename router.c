@@ -151,6 +151,11 @@ void socket_addr_init(){
 	skt_addr.sll_halen		=	6;
 }
 
+void print_ip(unsigned int* ip){
+	unsigned char* ip_char = (unsigned char*)ip;
+	printf("%d.%d.%d.%d\n",ip_char[0],ip_char[1],ip_char[2],ip_char[3]);
+}
+
 void ip_datagram_handle(unsigned char* eth,ip_header* iph);
 void arp_handle(unsigned char* eth, arp_header* arph){
 	if(arph->arp_opcode == 0x0100){
@@ -180,9 +185,9 @@ void arp_handle(unsigned char* eth, arp_header* arph){
 				if(queue_valid[i] == 1){
 					unsigned char * eth	=	socket_queue[i];
 					ip_header* iph = (ip_header*)(eth+14);
-					//printf("handle queue[%d] \n",i);
-					//printf("====================dequeue addr: 0x%x\n",(int)eth);
 					ip_datagram_handle(eth,iph);
+					queue_valid[i] = 0;
+					current_queue_len--;
 				}
 			}
 		}
@@ -195,27 +200,49 @@ inline int route_entry_hit(int i,unsigned int dst_ip){
 	return ((route_tab[i].netmask & dst_ip) == route_tab[i].destination);
 }
 
+inline int in_subnet(unsigned int ip,int route_tab_index){
+	unsigned int tmp1 = ip&route_tab[route_tab_index].netmask;
+	unsigned int tmp2 = route_tab[route_tab_index].gateway&route_tab[route_tab_index].netmask;
+	print_ip(&tmp1);
+	print_ip(&tmp2);
+	return (ip&route_tab[route_tab_index].netmask) ==
+		(route_tab[route_tab_index].gateway&route_tab[route_tab_index].netmask);
+}
+
 void ip_datagram_handle(unsigned char* eth,ip_header* iph){
-	if(iph->iph_destip == my_ip_addr_int){//不用做转发
-		printf("throw a datagram,sent to myself:\n");
-		return;
-	}
-	else{
-		int i;
-		for(i=0;i<MAX_ROUTE_INFO_SIZE;++i){
-			if(route_tab[i].valid==0){
-				break;
-			}
-			if(route_entry_hit(i,iph->iph_destip)){//找到转发规则
-				printf("hit a route entry\n");
-				forward_ip_datagram(eth,iph->iph_destip,i);
-				return ;
-			}
+	int i;
+	for(i=0;i<MAX_DEVICE_SIZE;i++){
+		if(device_tab[i].valid == 0){
+			break;
 		}
-		//没有查到相关的表项，丢弃
-		printf("throw a datagram,dst ip: 0x%x\n",iph->iph_destip);
-		return;
+		if(iph->iph_destip == device_tab[i].ip_addr ||
+					iph->iph_sourceip == device_tab[i].ip_addr){
+			printf("throw a datagram,sent to myself\n");
+			return;
+
+		}
 	}
+
+	for(i=0;i<MAX_ROUTE_INFO_SIZE;++i){
+		if(route_tab[i].valid==0){
+			break;
+		}
+		if(route_entry_hit(i,iph->iph_destip)){//找到转发规则
+			printf("hit a route entry\n");
+			if(in_subnet(iph->iph_destip,i)){
+				forward_ip_datagram(eth,iph->iph_destip,i);
+			}
+			else{
+				printf("not in one subnet!!\n");
+				forward_ip_datagram(eth,route_tab[i].gateway,i);
+			}
+			return ;
+		}
+	}
+	//没有查到相关的表项，丢弃
+	printf("throw a datagram,dst ip:");
+	print_ip(&(iph->iph_destip));
+	return;
 }
 
 void main_loop(){
@@ -229,19 +256,22 @@ void main_loop(){
 			printf("error when recv msg");
 			continue;
 		}
-		printf("---------------------catch a datagram!\n");
+		//printf("---------------------catch a datagram!\n");
 		eth_head = socket_buffer;
 		proto_type = ((unsigned short) eth_head[12] <<8) + eth_head[13];
-		printf("protocol type: 0x%x\n",proto_type);
+		//printf("protocol type: 0x%x\n",proto_type);
 		//判断类型并分发
 		if(proto_type == proto_arp){
-			printf("catch an arp datagram!\n");
+			printf("\n------------------------catch an arp datagram!\n");
 			arp_head = eth_head + 14;
 			arp_handle(eth_head,(arp_header*)arp_head);
 		}
 		else if(proto_type == proto_ip){
-			printf("catch an ip datagram!\n");
+			printf("\n------------------------catch an ip datagram!\n");
 			ip_head = eth_head + 14;
+			print_ip(&(((ip_header*)ip_head)->iph_sourceip));
+			printf(" =====>");
+			print_ip(&(((ip_header*)ip_head)->iph_destip));
 			ip_datagram_handle(eth_head,(ip_header*)ip_head);
 		}
 		else{
@@ -256,7 +286,7 @@ int main(){
 	arp_buffer_init();
 	arp_table_init();
 	read_route_tab("./route_tab/route_table.binary");
-	read_static_arp_tab("./arp_tab/arp_table.binary");
+	//read_static_arp_tab("./arp_tab/arp_table.binary");
 	if((sock_fd=socket(PF_PACKET,SOCK_RAW,htons(ETH_P_ALL)))<0){
 		printf("error create raw socket\n");
 		return -1;
@@ -267,14 +297,25 @@ int main(){
 
 int arp_request(unsigned int dst_ip,int route_tab_index){//index是在arp table中的下标
 	arp_header* arph = (arp_header*)(arp_buffer+14);
-	int i;
+	int i,device_tab_index;
+	printf("required interface: %s\n",route_tab[route_tab_index].interface);
+	for(i=0;i<MAX_ROUTE_INFO_SIZE;++i){
+		if(strcmp(route_tab[route_tab_index].interface,
+						device_tab[i].interface)==0){
+			device_tab_index = i;
+			break;
+		}
+	}
+	if(i==MAX_ROUTE_INFO_SIZE){
+		return 0;
+	}
 	for(i=0;i<6;++i){
-		arph->arp_sha[i]	=	device_tab[route_tab_index].mac_addr[i];
-		arp_buffer[6+i]		=	device_tab[route_tab_index].mac_addr[i];
+		arph->arp_sha[i]	=	device_tab[device_tab_index].mac_addr[i];
+		arp_buffer[6+i]		=	device_tab[device_tab_index].mac_addr[i];
 		arph->arp_dha[i]	=	0xff;
 		arp_buffer[i]		=	0xff;
 	}
-	arph->arp_spa = device_tab[route_tab_index].ip_addr;
+	arph->arp_spa = device_tab[device_tab_index].ip_addr;
 	arph->arp_dpa = dst_ip;
 
 	//get ifindex
@@ -289,7 +330,7 @@ int arp_request(unsigned int dst_ip,int route_tab_index){//index是在arp table�
 	int sent = sendto(sock_fd,arp_buffer,arp_len,0,
 				(struct sockaddr*)&skt_addr,sizeof(skt_addr));
 	assert(sent>0);
-	printf("-------------------send an arp\n");
+	printf("--------------------------send an arp\n");
 	return 1;
 }
 
@@ -302,13 +343,13 @@ void change_dstmac_forward_datagram(unsigned char* eth,
 			unsigned char* mac_addr,char* interface){
 	int i;
 	/*printf("my_mac:\n");
-	for(i=0;i<6;i++){
-		printf("0x%x ",eth[i]);
-	}
-	printf("\ndst_mac:\n");
-	for(i=0;i<6;i++){
-		printf("0x%x ",mac_addr[i]);
-	}*/
+	  for(i=0;i<6;i++){
+	  printf("0x%x ",eth[i]);
+	  }
+	  printf("\ndst_mac:\n");
+	  for(i=0;i<6;i++){
+	  printf("0x%x ",mac_addr[i]);
+	  }*/
 	//printf("\n");
 	for(i=0;i<6;i++){
 		eth[i+6]				=	eth[i];
@@ -326,20 +367,19 @@ void change_dstmac_forward_datagram(unsigned char* eth,
 	}
 	skt_addr.sll_ifindex = ifr.ifr_ifindex;
 	skt_addr.sll_protocol	=	htons(ETH_P_IP);
-	//printf("\nifindex: %d\n",skt_addr.sll_ifindex);
 
 	ip_header* iph = (ip_header*)(eth+14);
 	int packet_len = htons(iph->iph_len) + 14;
 	int sent = sendto(sock_fd,eth,packet_len,0,
 				(struct sockaddr*)&skt_addr,sizeof(skt_addr));
 	assert(sent>0);
-	printf("-------------------forwarded a datagram\n");
-
+	printf("----------forwarded a datagram ==>%x\n",iph->iph_destip);
 }
 
 void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_index){
 	int i;
 	char* interface = route_tab[route_tab_index].interface;
+	//printf("interface tp be used index:%d name:%s\n",route_tab_index,interface);
 	for(i=0;i<MAX_ARP_SIZE;++i){
 		//printf("i = %d\n",i);
 		if(arp_tab[i].valid==0){

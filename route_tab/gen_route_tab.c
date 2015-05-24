@@ -23,6 +23,12 @@ int main(){
 	route_tab[1].valid			=	1;
 	strcpy(route_tab[1].interface,"eth2");
 
+	route_tab[2].destination	=	inet_addr("192.168.3.0");
+	route_tab[2].gateway		=	inet_addr("192.168.2.2");
+	route_tab[2].netmask		=	inet_addr("255.255.255.0");
+	route_tab[2].valid			=	1;
+	strcpy(route_tab[2].interface,"eth2");
+
 	FILE* pfile;
 	pfile = fopen("route_table.binary","wb");
 	if(pfile == NULL){
