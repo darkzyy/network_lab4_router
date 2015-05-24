@@ -151,8 +151,7 @@ void socket_addr_init(){
 	skt_addr.sll_halen		=	6;
 }
 
-void change_dstmac_forward_datagram(unsigned char* eth,
-			unsigned char* mac_addr,char* interface);
+void ip_datagram_handle(unsigned char* eth,ip_header* iph);
 void arp_handle(unsigned char* eth, arp_header* arph){
 	if(arph->arp_opcode == 0x0100){
 		printf("-----arp request\n");
@@ -170,10 +169,10 @@ void arp_handle(unsigned char* eth, arp_header* arph){
 		/********** insert into arp table ************/
 		arp_tab[i].valid	=	1;
 		arp_tab[i].ip_addr	=	arph->arp_spa;
-		printf("-------ip: 0x%x\n",arph->arp_spa);
+		//printf("-------ip: 0x%x\n",arph->arp_spa);
 		for(j=0;j<6;j++){
 			arp_tab[i].mac_addr[j]	=	arph->arp_sha[j];
-			printf("%x ",arph->arp_sha[j]);
+			//printf("%x ",arph->arp_sha[j]);
 		}
 		printf("\ncurrent queue len: %d\n",current_queue_len);
 		if(current_queue_len>0){
@@ -181,39 +180,9 @@ void arp_handle(unsigned char* eth, arp_header* arph){
 				if(queue_valid[i] == 1){
 					unsigned char * eth	=	socket_queue[i];
 					ip_header* iph = (ip_header*)(eth+14);
-					for(j=0;j<MAX_ARP_SIZE;j++){
-						if(arp_tab[j].valid==1 && iph->iph_destip == arp_tab[j].ip_addr){
-							int device_index;
-							for(device_index=0;device_index<MAX_DEVICE_SIZE;device_index++){
-								if(device_tab[device_index].valid == 0){
-									printf("index: %d\n",device_index);
-									assert(0);
-								}
-								int t,tmp=1;
-								for(t=0;t<6;t++){
-									if(device_tab[i].mac_addr[t] !=
-												arp_tab[j].mac_addr[t]){
-										tmp = 0;
-									}
-								}
-
-								if(tmp){
-
-									printf("hit arp_entry 192 \n");
-									printf("dev index: %d\n",device_index);
-									printf("interface: %s\n",device_tab[device_index].interface);
-									change_dstmac_forward_datagram(eth,
-												arp_tab[j].mac_addr,
-												device_tab[device_index].interface);
-									return;
-								}
-							}
-						}
-						else{
-							printf("miss arp_entry\n");
-						}
-					}
-					//int packet_len = htons(iph->iph_len) + 14;
+					//printf("handle queue[%d] \n",i);
+					//printf("====================dequeue addr: 0x%x\n",(int)eth);
+					ip_datagram_handle(eth,iph);
 				}
 			}
 		}
@@ -285,6 +254,7 @@ int main(){
 	socket_addr_init();
 	init_device_tab();
 	arp_buffer_init();
+	arp_table_init();
 	read_route_tab("./route_tab/route_table.binary");
 	read_static_arp_tab("./arp_tab/arp_table.binary");
 	if((sock_fd=socket(PF_PACKET,SOCK_RAW,htons(ETH_P_ALL)))<0){
@@ -324,21 +294,21 @@ int arp_request(unsigned int dst_ip,int route_tab_index){//index是在arp table�
 }
 
 inline int arp_entry_hit(int i,unsigned int dst_ip){
-	printf("dst ip: 0x%x,\tarp entry ip: 0x%x\n",dst_ip,arp_tab[i].ip_addr);
+	//printf("dst ip: 0x%x,\tarp entry ip: 0x%x\n",dst_ip,arp_tab[i].ip_addr);
 	return (arp_tab[i].ip_addr == dst_ip);
 }
 
 void change_dstmac_forward_datagram(unsigned char* eth,
 			unsigned char* mac_addr,char* interface){
 	int i;
-	printf("my_mac:\n");
+	/*printf("my_mac:\n");
 	for(i=0;i<6;i++){
 		printf("0x%x ",eth[i]);
 	}
 	printf("\ndst_mac:\n");
 	for(i=0;i<6;i++){
 		printf("0x%x ",mac_addr[i]);
-	}
+	}*/
 	//printf("\n");
 	for(i=0;i<6;i++){
 		eth[i+6]				=	eth[i];
@@ -346,20 +316,21 @@ void change_dstmac_forward_datagram(unsigned char* eth,
 		skt_addr.sll_addr[i]	=	mac_addr[i];
 	}
 	//get ifindex
+	//printf("\ninterface: %s",interface);
 	strncpy(ifr.ifr_name, interface, IFNAMSIZ);
 	if (ioctl(sock_fd, SIOCGIFINDEX, &ifr) == -1) {
-		perror("SIOCGIFINDEX");
 		printf("ioctl error\n");
+		perror("SIOCGIFINDEX");
 		//exit(1);
 		return;
 	}
 	skt_addr.sll_ifindex = ifr.ifr_ifindex;
 	skt_addr.sll_protocol	=	htons(ETH_P_IP);
-	printf("\nifindex: %d\n",skt_addr.sll_ifindex);
+	//printf("\nifindex: %d\n",skt_addr.sll_ifindex);
 
 	ip_header* iph = (ip_header*)(eth+14);
 	int packet_len = htons(iph->iph_len) + 14;
-	int sent = sendto(sock_fd,socket_buffer,packet_len,0,
+	int sent = sendto(sock_fd,eth,packet_len,0,
 				(struct sockaddr*)&skt_addr,sizeof(skt_addr));
 	assert(sent>0);
 	printf("-------------------forwarded a datagram\n");
@@ -370,7 +341,7 @@ void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_in
 	int i;
 	char* interface = route_tab[route_tab_index].interface;
 	for(i=0;i<MAX_ARP_SIZE;++i){
-		printf("i = %d\n",i);
+		//printf("i = %d\n",i);
 		if(arp_tab[i].valid==0){
 			int suc = arp_request(dst_ip,route_tab_index);
 			if(suc){//add this packet to queue
@@ -384,9 +355,15 @@ void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_in
 					if(queue_valid[j]==0){
 						ip_header* iph = (ip_header*)(eth+14);
 						int packet_len = htons(iph->iph_len) + 14;
+						int i_tmp;
+						for(i_tmp=0;i_tmp<packet_len;i_tmp++){
+							socket_queue[j][i_tmp] = eth[i_tmp];
+						}
+						//printf("======================enqueue addr: 0x%x\n",(int)socket_queue[j]);
 						memcpy((void*)socket_queue[j],(void*)eth,packet_len);
-						queue_valid[current_queue_len++]=1;
-						printf("entered packet queue\n");
+						queue_valid[j]=1;
+						current_queue_len++;
+						printf("entered packet queue,len: %d\n",packet_len);
 						break;
 					}
 				}
