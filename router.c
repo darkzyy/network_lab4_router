@@ -58,31 +58,6 @@ void ip_datagram_handle(unsigned char* eth,ip_header* iph);
 void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_index);
 
 void init_device_tab(const char* filename){
-	/*
-	device_tab[0].valid			= 1;
-	strcpy(device_tab[0].interface,"eth1");
-	device_tab[0].mac_addr[0]	= 0x00; 
-	device_tab[0].mac_addr[1]	= 0x0c; 
-	device_tab[0].mac_addr[2]	= 0x29; 
-	device_tab[0].mac_addr[3]	= 0x8d; 
-	device_tab[0].mac_addr[4]	= 0x82; 
-	device_tab[0].mac_addr[5]	= 0x8b; 
-	device_tab[0].ip_addr		= inet_addr("192.168.1.1");
-	device_tab[1].valid			= 1;
-	strcpy(device_tab[1].interface,"eth2");
-	device_tab[1].mac_addr[0]	= 0x00; 
-	device_tab[1].mac_addr[1]	= 0x0c; 
-	device_tab[1].mac_addr[2]	= 0x29; 
-	device_tab[1].mac_addr[3]	= 0x8d; 
-	device_tab[1].mac_addr[4]	= 0x82; 
-	device_tab[1].mac_addr[5]	= 0x95; 
-	device_tab[1].ip_addr		= inet_addr("192.168.2.1");
-
-	int i;
-	for(i=2;i<MAX_DEVICE_SIZE;++i){
-		device_tab[i].valid = 0;
-	}
-	*/
 	FILE* pfile;
 	pfile = fopen(filename,"rb");
 	if(pfile == NULL){
@@ -145,22 +120,6 @@ void arp_buffer_init(){
 	arph->arp_opcode	=	0x0100;//request
 }
 
-/*void read_static_arp_tab(const char* filename){
-	FILE* pfile;
-	pfile = fopen(filename,"rb");
-	if(pfile == NULL){
-		printf("error opening arp_table!\n");
-		return;
-	}
-	int suc;
-	suc = fread(arp_tab,1,sizeof(arp_tab),pfile);
-	if(suc!=sizeof(arp_tab)){
-		printf("error when reading arp_tab");
-	}
-	fclose(pfile);
-}
-*/
-
 void socket_addr_init(){
 	skt_addr.sll_addr[6] = 0x00;
 	skt_addr.sll_addr[7] = 0x00;
@@ -193,11 +152,10 @@ void arp_handle(unsigned char* eth, arp_header* arph){
 		/********** insert into arp table ************/
 		arp_tab[i].valid	=	1;
 		arp_tab[i].ip_addr	=	arph->arp_spa;
-		//printf("-------ip: 0x%x\n",arph->arp_spa);
 		for(j=0;j<6;j++){
 			arp_tab[i].mac_addr[j]	=	arph->arp_sha[j];
-			//printf("%x ",arph->arp_sha[j]);
 		}
+
 		printf("\ncurrent queue len: %d\n",current_queue_len);
 		if(current_queue_len>0){
 			for(i=0;i<current_queue_len;++i){
@@ -390,7 +348,6 @@ void forward_ip_datagram(unsigned char* eth,unsigned int dst_ip,int route_tab_in
 						for(i_tmp=0;i_tmp<packet_len;i_tmp++){
 							socket_queue[j][i_tmp] = eth[i_tmp];
 						}
-						//printf("======================enqueue addr: 0x%x\n",(int)socket_queue[j]);
 						memcpy((void*)socket_queue[j],(void*)eth,packet_len);
 						queue_valid[j]=1;
 						current_queue_len++;

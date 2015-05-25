@@ -33,6 +33,7 @@ struct device_item{
 	int valid;
 	char interface[14]; 
 	unsigned char mac_addr[6]; 
+	unsigned int ip_addr;
 };
 
 typedef struct route_item route_item;
